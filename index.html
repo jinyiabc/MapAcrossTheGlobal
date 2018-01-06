@@ -254,7 +254,7 @@
 
                 console.log(path1);
 
-                  svg.selectAll("path")
+                  countriesGroup.selectAll("path")
                   .data(data.features)
                   .enter().append("path")
                   .attr("d", path1)
@@ -272,7 +272,7 @@
                       div.transition()
                           .duration(200)
                           .style("opacity", .9);
-                      div	.html("<strong>Mass:</strong>"+d.properties.mass + "<br/>"  + "<strong>Name:</strong>"+d.properties.name+"<br/>"+"<strong>Reclong:</strong>"+d.properties.reclong+"<br/>"+ d3.event.pageX + ","+d3.event.pageY + "<br/>" + d.geometry.coordinates[0]+":"+d.geometry.coordinates[1])
+                      div	.html("<strong>Mass:</strong>"+d.properties.mass + "<br/>"  + "<strong>Name:</strong>"+d.properties.name+"<br/>"+"<strong>Reclong:</strong>"+d.properties.reclong+"<br/>")
                           .style("left", (d3.event.pageX) + "px")
                           .style("top", (d3.event.pageY - 28) + "px");
                       })
