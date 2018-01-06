@@ -5,6 +5,7 @@
     <meta name="viewport" content="initial-scale=1.0, width=device-width" />
     <title>Map Across the Global</title>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.5.0/d3.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Yanone+Kaffeesatz:200" rel="stylesheet">
     <style>
@@ -40,13 +41,29 @@
       .countryLabelBg{
         fill: #30BCED;   /* country label background colour */
       }
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 200px;
+        height: 100px;
+        padding: 10px;
+        font: 16px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+}
+
     </style>
   </head>
 
   <body>
     <div id="map-holder"></div>
     <script type="text/javascript">
-
+    // Define the div for the tooltip
+    var div = d3.select("#map-holder").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
       // DEFINE VARIABLES
       // Define size of map group
       // Full world map is 2:1 ratio
@@ -69,8 +86,7 @@
       // Define map path
       var path = d3
         .geoPath()
-        .projection(projection)
-      ;
+        .projection(projection);
 
       // Create function to apply zoom to countriesGroup
       function zoomed() {
@@ -207,22 +223,85 @@
             .attr("id", function(d, i) {
               return "country" + d.properties.iso_a3;
             })
-            .attr("class", "country");
-          initiateZoom();
-          d3.json("data/data.json",function(data){
-              fellGroup = svg.append("g").attr("id","fell")
-                             .selectAll("path")
-                             .data("data.features")
-                             .enter().append("path")
-                             .attr("d", path);
-                             // .append("circle");
-                             // .attr("cx", w/2)
-                             // .attr("cx", h/2)
-                             // .attr("r",100)
-                             // .attr("fill","red");
-            // console.log(data.features[0].geometry.coordinates[0]);   //6.08333
+            .attr("class", "country")
+            .exit().remove();
+//             .on("mouseover", function(d) {
+//                 div.transition()
+//                     .duration(200)
+//                     .style("opacity", .9);
+//                 div	.html(d3.event.pageX + ","+d3.event.pageY + "<br/>" + d.geometry.coordinates[0]+":"+d.geometry.coordinates[1])
+//                     .style("left", (d3.event.pageX) + "px")
+//                     .style("top", (d3.event.pageY - 28) + "px");
+//                 })
+//             .on("mouseout", function(d) {
+//                 div.transition()
+//                     .duration(500)
+//                     .style("opacity", 0);
+// });
 
-          });
+            d3.json("data/data.json",function(data){
+
+              var path1 = d3
+                .geoPath()
+                .projection(projection)
+                .pointRadius(function(d){
+                  if(+d.properties.mass >= 100000){
+                    return 25;
+                  } else {
+                    return 5;
+                  }
+                });
+
+                console.log(path1);
+
+                  svg.selectAll("path")
+                  .data(data.features)
+                  .enter().append("path")
+                  .attr("d", path1)
+                  .attr("fill",function(d){
+                    if(+d.properties.mass >= 100000){
+                      return "red";
+                    } else {
+                      return "yellow";
+                    }
+                  })
+                  .attr("opacity",0.6)
+                  .attr("stroke","white")
+                  .attr("stroke-width","1")
+                  .on("mouseover", function(d) {
+                      div.transition()
+                          .duration(200)
+                          .style("opacity", .9);
+                      div	.html("<strong>Mass:</strong>"+d.properties.mass + "<br/>"  + "<strong>Name:</strong>"+d.properties.name+"<br/>"+"<strong>Reclong:</strong>"+d.properties.reclong+"<br/>"+ d3.event.pageX + ","+d3.event.pageY + "<br/>" + d.geometry.coordinates[0]+":"+d.geometry.coordinates[1])
+                          .style("left", (d3.event.pageX) + "px")
+                          .style("top", (d3.event.pageY - 28) + "px");
+                      })
+                  .on("mouseout", function(d) {
+                      div.transition()
+                          .duration(500)
+                          .style("opacity", 0);
+});
+
+
+            //     fellGroup = svg.append("g").attr("id","fell")
+            //                    .selectAll("path")
+            //                    .data("data.features")
+            //                    .enter().append("path")
+            //                    .attr("d", path);
+            // console.log(d3.select("svg").node());
+            // console.log(d3.select("svg"));
+
+                               // .append("circle");
+                               // .attr("cx", w/2)
+                               // .attr("cx", h/2)
+                               // .attr("r",100)
+                               // .attr("fill","red");
+              // console.log(data.features[0].geometry.coordinates[0]);   //6.08333
+
+            });
+
+          initiateZoom();
+
         }
       );
 
